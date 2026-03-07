@@ -1,0 +1,57 @@
+#.github/workflows/cloudformation-deploy.yml
+name: CloudFormation Deploy
+
+on:
+    workflow_call:
+        inputs:
+            aws-region:
+                description: AWS Region
+                required: true
+                type: string
+
+            template-file:
+                description: CloudFormation template file path
+                required: false
+                type: string
+                default: "template.yaml"
+
+permissions:
+    id-token: write
+    contents: read
+
+jobs:
+    deploy:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v5
+            - name: Login to AWS
+              uses: prabhashbhajnai/ci-templates/actions/aws-login@main
+              with:
+                  oidc-role: ${{ secrets.AWS_OIDC_ROLE_ARN }}
+                  aws-region: ${{ inputs.aws-region}}
+
+            - name: Verify CloudFormation Template
+              run: |
+                  echo "Verifying CloudFormation template..."
+                  aws cloudformation validate-template \
+                        --template-body file://${{ inputs.template-file }} \
+                        --region ${{ inputs.aws-region }}
+
+            - name: Deploy CloudFormation Stack
+              run: |
+                  echo "Deploying CloudFormation Stack..."
+                  PROJECT_NAME=$(echo "${{ github.event.repository.name }}" | tr '[:upper:]' '[:lower:]')
+
+                  if [ -f "parameters.json" ]; then
+                        PARAMS='--parameter-overrides file://parameters.json'
+                  else
+                        PARAMS=''
+                  fi
+
+                  aws cloudformation deploy \
+                      --template-file ${{ inputs.template-file }} \
+                      --stack-name ${PROJECT_NAME}-stack \
+                      --region ${{ inputs.aws-region }} \
+                      ${PARAMS} \
+                      --capabilities CAPABILITY_NAMED_IAM \
+                  echo "CloudFormation Stack deployed"

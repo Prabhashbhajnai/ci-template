@@ -1,0 +1,22 @@
+#actions/aws-login/action.yml
+name: Login to AWS
+description: Configure AWS credentials using OIDC
+
+inputs:
+    oidc-role:
+        description: AWS OIDC Role ARN
+        required: true
+
+    aws-region:
+        description: AWS Region
+        required: true
+
+runs:
+    using: composite
+
+    steps:
+        - name: Configure AWS credentials
+          uses: aws-actions/configure-aws-credentials@main
+          with:
+              role-to-assume: ${{ inputs.oidc-role }}
+              aws-region: ${{ inputs.aws-region }}

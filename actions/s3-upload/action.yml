@@ -1,0 +1,20 @@
+#actions/s3-upload/action.yml
+name: S3 Upload
+description: Upload to S3 Bucket
+
+inputs:
+    aws-region:
+        description: AWS Region
+        required: true
+
+runs:
+    using: composite
+
+    steps:
+        - name: Sync build to S3
+          shell: bash
+          run: |
+            BUCKET_NAME=$(jq -r '.[] | select(.ParameterKey=="BucketName") | .ParameterValue' parameters.json)
+            
+            echo "Syncing build to S3 bucket: $BUCKET_NAME"
+            aws s3 sync ./dist s3://$BUCKET_NAME --delete --region=ap-south-1
