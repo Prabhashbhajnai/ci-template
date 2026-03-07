@@ -1,4 +1,4 @@
-#.github/workflows/react-build.yml
+#.github/workflows/react-ci.yml
 
 name: React Build
 
