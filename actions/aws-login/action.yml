@@ -16,7 +16,7 @@ runs:
 
     steps:
         - name: Configure AWS credentials
-          uses: aws-actions/configure-aws-credentials@main
+          uses: aws-actions/configure-aws-credentials@v4
           with:
               role-to-assume: ${{ inputs.oidc-role }}
               aws-region: ${{ inputs.aws-region }}

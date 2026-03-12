@@ -40,12 +40,12 @@ jobs:
             - name: Deploy CloudFormation Stack
               run: |
                   echo "Deploying CloudFormation Stack..."
-                  =$(echo "${{ github.evePROJECT_NAMEnt.repository.name }}" | tr '[:upper:]' '[:lower:]')
+                  PROJECT_NAME=$(echo "${{ github.event.repository.name }}" | tr '[:upper:]' '[:lower:]')
 
                   if [ -f "parameters.json" ]; then
-                        PARAMS='--parameter-overrides file://parameters.json'
+                        PARAMS="--parameter-overrides file://parameters.json"
                   else
-                        PARAMS=''
+                        PARAMS=""
                   fi
 
                   aws cloudformation deploy \
@@ -54,4 +54,5 @@ jobs:
                       --region ${{ inputs.aws-region }} \
                       ${PARAMS} \
                       --capabilities CAPABILITY_NAMED_IAM \
+                      --no-fail-on-empty-changeset 
                   echo "CloudFormation Stack deployed"
