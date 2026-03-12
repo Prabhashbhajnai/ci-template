@@ -6,6 +6,10 @@ inputs:
     aws-region:
         description: AWS Region
         required: true
+    
+    artifact:
+        description: File/Folder to be uploaded
+        default: ./dist
 
 runs:
     using: composite
@@ -17,4 +21,6 @@ runs:
             BUCKET_NAME=$(jq -r '.[] | select(.ParameterKey=="BucketName") | .ParameterValue' parameters.json)
             
             echo "Syncing build to S3 bucket: $BUCKET_NAME"
-            aws s3 sync ./dist s3://$BUCKET_NAME --delete --region=ap-south-1
+            aws s3 sync ${{ inputs.artifact }} s3://$BUCKET_NAME \
+            --delete \
+            --region ${{ inputs.aws-region }}

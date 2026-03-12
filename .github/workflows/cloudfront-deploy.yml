@@ -1,0 +1,44 @@
+#.github/workflows/cloudfront-deploy.yml
+name: CloudFront Deploy
+
+on:
+    workflow_call:
+        inputs: 
+            aws-region:
+                description: AWS Region
+                required: true
+                type: string
+
+jobs:
+    deploy:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v5
+            - name: Set build version
+              run: echo "BUILD_VERSION=${GITHUB_SHA}" >> $GITHUB_ENV
+            
+            - name: Upload Assets to S3
+              run: |
+                BUCKET_NAME=$(jq -r '.[] | select(.ParameterKey=="BucketName") | .ParameterValue' parameters.json)
+                echo "BUCKET_NAME=$BUCKET_NAME" >> $GITHUB_ENV
+                aws s3 sync dist/assets s3://$BUCKET_NAME/assets \
+                --cache-control "public,max-age=31536000,immutable"
+            
+            - name: Upload index.html to S3
+              run: |
+                aws s3 cp dist/index.html s3://$BUCKET_NAME/index.html \
+                --cache-control "no-cache, no-store, must-revalidate"
+
+            # - name: Invalidate CloudFront Cache
+            #   run: |
+            #     STACK_NAME=$(echo "${{ github.event.repository.name }}" | tr '[:upper:]' '[:lower:]')
+
+            #     DISTRIBUTION_ID=$(aws cloudformation describe-stacks \
+            #       --stack-name $STACK_NAME \
+            #       --query "Stacks[0].Outputs[?OutputKey=='CloudFrontDistributionId'].OutputValue" \
+            #       --output text)
+
+            #     echo "Invalidating CloudFront cache for distribution: $DISTRIBUTION_ID"
+            #     aws cloudfront create-invalidation \
+            #       --distribution-id $DISTRIBUTION_ID \
+            #       --paths "/index.html"

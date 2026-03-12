@@ -40,7 +40,7 @@ jobs:
             - name: Deploy CloudFormation Stack
               run: |
                   echo "Deploying CloudFormation Stack..."
-                  PROJECT_NAME=$(echo "${{ github.event.repository.name }}" | tr '[:upper:]' '[:lower:]')
+                  =$(echo "${{ github.evePROJECT_NAMEnt.repository.name }}" | tr '[:upper:]' '[:lower:]')
 
                   if [ -f "parameters.json" ]; then
                         PARAMS='--parameter-overrides file://parameters.json'
