@@ -42,7 +42,7 @@ jobs:
                   PROJECT_NAME=$(echo "${{ github.event.repository.name }}" | tr '[:upper:]' '[:lower:]')
 
                   if [ -f "parameters.json" ]; then
-                        PARAMS="--parameter file://parameters.json"
+                        PARAMS="--parameters file://parameters.json"
                   else
                         PARAMS=""
                   fi
