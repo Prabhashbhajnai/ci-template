@@ -42,16 +42,19 @@ jobs:
                   PROJECT_NAME=$(echo "${{ github.event.repository.name }}" | tr '[:upper:]' '[:lower:]')
 
                   if [ -f "parameters.json" ]; then
-                        PARAMS="--parameter file://parameters.json"
+                        PARAMS=$(jq -r '.[] | "\(.ParameterKey)=\(.ParameterValue)"' parameters.json)
                   else
                         PARAMS=""
                   fi
+
+                  echo "Parameters: "
+                  echo $PARAMS
 
                   aws cloudformation deploy \
                       --template-file ${{ inputs.template-file }} \
                       --stack-name ${PROJECT_NAME}-stack \
                       --region ${{ inputs.aws-region }} \
-                      ${PARAMS} \
+                      --parameter-overrides $PARAMS \
                       --capabilities CAPABILITY_NAMED_IAM \
                       --no-fail-on-empty-changeset 
                   echo "CloudFormation Stack deployed"
