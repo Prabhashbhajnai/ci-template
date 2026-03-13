@@ -23,10 +23,6 @@ jobs:
     deploy:
         runs-on: ubuntu-latest
         steps:
-            - name: Check Credentials
-              run: |
-                  echo ${{ vars.AWS_OIDC_ROLE_ARN }}
-
             - uses: actions/checkout@v5
             - name: Login to AWS
               uses: prabhashbhajnai/ci-template/actions/aws-login@main

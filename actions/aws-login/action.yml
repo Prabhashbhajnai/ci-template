@@ -14,5 +14,5 @@ runs:
         - name: Configure AWS credentials
           uses: aws-actions/configure-aws-credentials@v4
           with:
-              role-to-assume: arn:aws:iam::418278132541:oidc-provider/token.actions.githubusercontent.com
+              role-to-assume: arn:aws:iam::418278132541:role/OIDC-Github
               aws-region: ${{ inputs.aws-region }}
