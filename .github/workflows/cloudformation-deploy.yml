@@ -41,10 +41,9 @@ jobs:
                   echo "Deploying CloudFormation Stack..."
                   PROJECT_NAME=$(echo "${{ github.event.repository.name }}" | tr '[:upper:]' '[:lower:]')
 
+                  PARAMS=""
                   if [ -f "parameters.json" ]; then
-                        PARAMS=$(jq -r '.[] | "\(.ParameterKey)=\(.ParameterValue)"' parameters.json)
-                  else
-                        PARAMS=""
+                    PARAMS=$(jq -r '.[] | "\(.ParameterKey)=\(.ParameterValue)"' parameters.json)
                   fi
 
                   echo "Parameters: "
