@@ -31,7 +31,6 @@ jobs:
             - name: Login to AWS
               uses: prabhashbhajnai/ci-template/actions/aws-login@main
               with:
-                  oidc-role: ${{ vars.AWS_OIDC_ROLE_ARN }}
                   aws-region: ${{ inputs.aws-region}}
 
             - name: Verify CloudFormation Template

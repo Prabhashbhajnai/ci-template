@@ -3,10 +3,6 @@ name: Login to AWS
 description: Configure AWS credentials using OIDC
 
 inputs:
-    oidc-role:
-        description: AWS OIDC Role ARN
-        required: true
-
     aws-region:
         description: AWS Region
         required: true
@@ -18,5 +14,5 @@ runs:
         - name: Configure AWS credentials
           uses: aws-actions/configure-aws-credentials@v4
           with:
-              role-to-assume: ${{ inputs.oidc-role }}
+              role-to-assume: arn:aws:iam::418278132541:oidc-provider/token.actions.githubusercontent.com
               aws-region: ${{ inputs.aws-region }}
