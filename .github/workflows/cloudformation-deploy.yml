@@ -55,6 +55,7 @@ jobs:
                       --region ${{ inputs.aws-region }} \
                       --parameter-overrides $PARAMS \
                       --capabilities CAPABILITY_NAMED_IAM \
-                      --role-arn arn:aws:iam::418278132541:role/CloudFormationExecutionRole
-                      --no-fail-on-empty-changeset 
+                      --role-arn arn:aws:iam::418278132541:role/CloudFormationExecutionRole \
+                      --no-fail-on-empty-changeset \
+                      --debug
                   echo "CloudFormation Stack deployed"
