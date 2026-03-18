@@ -26,6 +26,12 @@ jobs:
             - name: Set build version
               run: echo "BUILD_VERSION=${GITHUB_SHA}" >> $GITHUB_ENV
 
+            - name: Download Build Artifacts
+              uses: actions/download-artifact@main
+              with:
+                name: react-build
+                path: ./dist              
+
             - name: Upload Assets to S3
               run: |
                   BUCKET_NAME=$(jq -r '.[] | select(.ParameterKey=="BucketName") | .ParameterValue' parameters.json)
