@@ -3,31 +3,42 @@ name: CloudFront Deploy
 
 on:
     workflow_call:
-        inputs: 
+        inputs:
             aws-region:
                 description: AWS Region
                 required: true
                 type: string
 
+permissions:
+    id-token: write
+    contents: read
+
 jobs:
     deploy:
         runs-on: ubuntu-latest
         steps:
+            - name: Login to AWS
+              uses: prabhashbhajnai/ci-template/actions/aws-login@main
+              with:
+                  aws-region: ${{ inputs.aws-region}}
+
             - uses: actions/checkout@v5
             - name: Set build version
               run: echo "BUILD_VERSION=${GITHUB_SHA}" >> $GITHUB_ENV
-            
+
             - name: Upload Assets to S3
               run: |
-                BUCKET_NAME=$(jq -r '.[] | select(.ParameterKey=="BucketName") | .ParameterValue' parameters.json)
-                echo "BUCKET_NAME=$BUCKET_NAME" >> $GITHUB_ENV
-                aws s3 sync dist/assets s3://$BUCKET_NAME/assets \
-                --cache-control "public,max-age=31536000,immutable"
-            
+                  BUCKET_NAME=$(jq -r '.[] | select(.ParameterKey=="BucketName") | .ParameterValue' parameters.json)
+                  echo "BUCKET_NAME=$BUCKET_NAME" >> $GITHUB_ENV
+                  aws s3 sync dist/assets s3://$BUCKET_NAME/assets \
+                  --cache-control "public,max-age=31536000,immutable" \
+                  --role-arn arn:aws:iam::418278132541:role/CloudFormationExecutionRole 
+
             - name: Upload index.html to S3
               run: |
-                aws s3 cp dist/index.html s3://$BUCKET_NAME/index.html \
-                --cache-control "no-cache, no-store, must-revalidate"
+                  aws s3 cp dist/index.html s3://$BUCKET_NAME/index.html \
+                  --cache-control "no-cache, no-store, must-revalidate" \
+                  --role-arn arn:aws:iam::418278132541:role/CloudFormationExecutionRole 
 
             # - name: Invalidate CloudFront Cache
             #   run: |
