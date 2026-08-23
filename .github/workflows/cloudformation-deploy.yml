@@ -14,18 +14,49 @@ on:
                 required: false
                 type: string
                 default: "template.yaml"
-            
+
             s3-bucket:
                 description: S3 bucket for packaging
                 required: true
                 type: string
+
+            cloudformation-deploy:
+                description: Deploy Cloudformation stack
+                required: true
+                type: boolean
+                default: false
 
 permissions:
     id-token: write
     contents: read
 
 jobs:
-    deploy:
+    lint:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v5
+            - name: Lint Cloudformation Template
+              run: |
+                  echo "Install cfn-lint"
+                  pip install cfn-lint
+
+                  echo "CloudFormation templates:"
+                  find . \
+                  -type f \
+                  \( -name "*.yml" -o -name "*.yaml" \) \
+                  -not -path "./.github/*"
+
+                  echo "Validating CloudFormation template recursively..."
+                  cfn-lint \
+                  $(find . \
+                      -type f \
+                      \( -name "*.yml" -o -name "*.yaml" \) \
+                      -not -path "./.github/*" \
+                      -not -name "MainStack.yml")
+
+    pack-template:
+        if: ${{ inputs.cloudformation-deploy }}
+        needs: lint
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v5
@@ -43,12 +74,36 @@ jobs:
                         --output-template-file packaged-template.yaml \
                         --region ${{ inputs.aws-region }}
 
-            - name: Verify CloudFormation Template
+            - name: Validate CloudFormation Template
               run: |
                   echo "Verifying CloudFormation template..."
                   aws cloudformation validate-template \
-                        --template-body file://packaged-template.yaml \
-                        --region ${{ inputs.aws-region }}
+                          --template-body file://packaged-template.yaml \
+                          --region ${{ inputs.aws-region }}
+
+            - name: Upload packaged template
+              uses: actions/upload-artifact@main
+              with:
+                  name: packaged-cloudformation-template
+                  path: packaged-template.yaml
+                  retention-days: 1
+
+    deploy:
+        if: ${{ inputs.cloudformation-deploy }}
+        needs: pack-template
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v5
+
+            - name: Dowload packaged template
+              uses: actions/download-artifact@main
+              with:
+                  name: packaged-cloudformation-template
+
+            - name: Login to AWS
+              uses: prabhashbhajnai/ci-template/actions/aws-login@main
+              with:
+                  aws-region: ${{ inputs.aws-region}}
 
             - name: Deploy CloudFormation Stack
               run: |
