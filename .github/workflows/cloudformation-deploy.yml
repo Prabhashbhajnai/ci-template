@@ -14,6 +14,11 @@ on:
                 required: false
                 type: string
                 default: "template.yaml"
+            
+            s3-bucket:
+                description: S3 bucket for packaging
+                required: true
+                type: string
 
 permissions:
     id-token: write
@@ -29,11 +34,20 @@ jobs:
               with:
                   aws-region: ${{ inputs.aws-region}}
 
+            - name: Pack Template
+              run: |
+                  echo "Packing CloudFormation template..."
+                  aws cloudformation package \
+                        --template-file ${{ inputs.template-file }} \
+                        --s3-bucket ${{ inputs.s3-bucket }} \
+                        --output-template-file packaged-template.yaml \
+                        --region ${{ inputs.aws-region }}
+
             - name: Verify CloudFormation Template
               run: |
                   echo "Verifying CloudFormation template..."
                   aws cloudformation validate-template \
-                        --template-body file://${{ inputs.template-file }} \
+                        --template-body file://packaged-template.yaml \
                         --region ${{ inputs.aws-region }}
 
             - name: Deploy CloudFormation Stack
@@ -50,12 +64,11 @@ jobs:
                   echo $PARAMS
 
                   aws cloudformation deploy \
-                      --template-file ${{ inputs.template-file }} \
+                      --template-file packaged-template.yaml \
                       --stack-name ${PROJECT_NAME}-stack \
                       --region ${{ inputs.aws-region }} \
                       --parameter-overrides $PARAMS \
                       --capabilities CAPABILITY_NAMED_IAM \
                       --role-arn arn:aws:iam::418278132541:role/CloudFormationExecutionRole \
-                      --no-fail-on-empty-changeset \
-                      --debug
+                      --no-fail-on-empty-changeset 
                   echo "CloudFormation Stack deployed"
