@@ -46,7 +46,7 @@ jobs:
                   \( -name "*.yml" -o -name "*.yaml" \) \
                   -not -path "./.github/*"
 
-                  echo "Validating CloudFormation template recursively..."
+                  echo "Linting CloudFormation template recursively..."
                   cfn-lint \
                   $(find . \
                       -type f \
