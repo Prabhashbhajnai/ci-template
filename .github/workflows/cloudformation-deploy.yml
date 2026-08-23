@@ -52,7 +52,7 @@ jobs:
                       -type f \
                       \( -name "*.yml" -o -name "*.yaml" \) \
                       -not -path "./.github/*" \
-                      -not -name "${{ inputs.template-file }}")
+                      -not -name "MainStack.yml")
 
     pack-template:
         if: ${{ inputs.cloudformation-deploy }}
