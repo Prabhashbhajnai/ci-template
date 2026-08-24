@@ -60,6 +60,12 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v5
+
+            - name: Debug OIDC claims
+              uses: github/actions-oidc-debugger@main
+              with:
+                  audience: sts.amazonaws.com
+
             - name: Login to AWS
               uses: prabhashbhajnai/ci-template/actions/aws-login@main
               with:
