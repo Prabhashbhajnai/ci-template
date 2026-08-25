@@ -15,11 +15,6 @@ on:
                 type: string
                 default: "MainStack.yml"
 
-            s3-bucket:
-                description: S3 bucket for packaging
-                required: true
-                type: string
-
             cloudformation-deploy:
                 description: Deploy Cloudformation stack
                 required: true
@@ -67,13 +62,13 @@ jobs:
 
             - name: Pack Template
               run: |
-                  if aws s3api head-bucket --bucket "${{ inputs.s3-bucket }}" 2>/dev/null; then
+                  if aws s3api head-bucket --bucket prabhash-cfn-artifacts-41827813254 2>/dev/null; then
                   echo "S3 bucket already exists"
                   else
                   echo "S3 bucket does not exist. Creating..."
 
                   aws s3api create-bucket \
-                    --bucket "${{ inputs.s3-bucket }}" \
+                    --bucket prabhash-cfn-artifacts-41827813254 \
                     --region "${{ inputs.aws-region }}" \
                     --create-bucket-configuration LocationConstraint="${{ inputs.aws-region }}"
                   fi
@@ -81,7 +76,7 @@ jobs:
                   echo "Packing CloudFormation template..."
                   aws cloudformation package \
                         --template-file ${{ inputs.template-file }} \
-                        --s3-bucket ${{ inputs.s3-bucket }} \
+                        --s3-bucket prabhash-cfn-artifacts-41827813254 \
                         --output-template-file packaged-template.yaml \
                         --region ${{ inputs.aws-region }}
 
