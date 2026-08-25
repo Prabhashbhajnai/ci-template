@@ -67,6 +67,17 @@ jobs:
 
             - name: Pack Template
               run: |
+                  if aws s3api head-bucket --bucket "${{ inputs.s3-bucket }}" 2>/dev/null; then
+                  echo "S3 bucket already exists"
+                  else
+                  echo "S3 bucket does not exist. Creating..."
+
+                  aws s3api create-bucket \
+                    --bucket "${{ inputs.s3-bucket }}" \
+                    --region "${{ inputs.aws-region }}" \
+                    --create-bucket-configuration LocationConstraint="${{ inputs.aws-region }}"
+                  fi
+
                   echo "Packing CloudFormation template..."
                   aws cloudformation package \
                         --template-file ${{ inputs.template-file }} \
